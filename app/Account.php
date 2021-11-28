@@ -4,13 +4,8 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Account extends Model
-{   
-    public $incrementing = false;
-    protected $keyType = 'string';
+class account extends Model
+{
+    protected $table = 'account';
     public $timestamps = false;
-
-    public function parts(){
-        return $this->belongsTo(Part::class); //pertenece a part
-    }
 }
