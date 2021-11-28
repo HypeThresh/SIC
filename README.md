@@ -1,2 +1,2 @@
-# SIC
-Programa de Contabilidad
+# ProyectoSIC
+Proyecto para la materia de Sistemas Contables
