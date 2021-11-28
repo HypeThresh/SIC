@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
-use App\Providers\RouteServiceProvider;
 use App\User;
+use Validator;
+use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\RegistersUsers;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 
+/**
+ * Class RegisterController
+ * @package %%NAMESPACE%%\Http\Controllers\Auth
+ */
 class RegisterController extends Controller
 {
     /*
@@ -25,11 +27,21 @@ class RegisterController extends Controller
     use RegistersUsers;
 
     /**
-     * Where to redirect users after registration.
+     * Show the application registration form.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function showRegistrationForm()
+    {
+        return view('adminlte::auth.register');
+    }
+
+    /**
+     * Where to redirect users after login / registration.
      *
      * @var string
      */
-    protected $redirectTo = RouteServiceProvider::HOME;
+    protected $redirectTo = '/home';
 
     /**
      * Create a new controller instance.
@@ -39,7 +51,6 @@ class RegisterController extends Controller
     public function __construct()
     {
         $this->middleware('guest');
-        //$this->middleware('auth');
     }
 
     /**
@@ -51,10 +62,11 @@ class RegisterController extends Controller
     protected function validator(array $data)
     {
         return Validator::make($data, [
-            'name' => ['required', 'string','min:3','max:255'],
-            'username' => ['required', 'string', 'max:255','unique:users'],
-            'password' => ['required', 'string', 'min:5'],
-            'type' => ['required'],
+            'name'     => 'required|max:255',
+            'username' => 'sometimes|required|max:255|unique:users',
+            'email'    => 'required|email|max:255|unique:users',
+            'password' => 'required|min:6|confirmed',
+            'terms'    => 'required',
         ]);
     }
 
@@ -62,16 +74,18 @@ class RegisterController extends Controller
      * Create a new user instance after a valid registration.
      *
      * @param  array  $data
-     * @return \App\User
+     * @return User
      */
     protected function create(array $data)
     {
-        return User::create([
-            'name' => $data['name'],
-            'username' => $data['username'],
-            'password' => Hash::make($data['password']),
-            'type' => $data['type'],
-            'active' => 1
-        ]);
+        $fields = [
+            'name'     => $data['name'],
+            'email'    => $data['email'],
+            'password' => bcrypt($data['password']),
+        ];
+        if (config('auth.providers.users.field','email') === 'username' && isset($data['username'])) {
+            $fields['username'] = $data['username'];
+        }
+        return User::create($fields);
     }
 }
